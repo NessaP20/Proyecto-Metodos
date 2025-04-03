@@ -1,4 +1,4 @@
-/mi_proyecto/
+mi_proyecto/
 │── /app/               # Carpeta principal de la aplicación
 │   │── /static/        # Archivos estáticos (CSS, JS, imágenes)
 │   │── /templates/     # Plantillas HTML (Jinja2)
