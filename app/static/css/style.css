@@ -1,0 +1,120 @@
+.navbar {
+    background-color: #28a745; /* Color verde para la barra de navegación */
+}
+
+.navbar a {
+    color: black !important;
+}
+
+.cart {
+    font-size: 1.5rem;
+    margin-right: 15px;
+}
+
+.cart i {
+    color: white;
+}
+
+.cart .badge {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 10px;
+    font-size: 1rem;
+}
+
+.card {
+    border-radius: 10px;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+footer {
+    background: #ffc107;
+    color: black;
+    padding: 20px;
+}
+
+.btn-green {
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.btn-green:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+}
+
+.user-menu .dropdown-menu {
+    margin-top: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #28a745;
+}
+
+.user-menu .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.user-menu .dropdown-item i {
+    margin-right: 8px;
+    color: #28a745;
+}
+
+.welcome-text {
+    color: black;
+    margin-right: 15px;
+}
+
+.login-container, .account-container, .registro-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+}
+
+.login-title, .account-title, .registro-title {
+    color: #28a745;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-icon, .registro-icon {
+    text-align: center;
+    font-size: 3rem;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #28a745;
+}
+
+.nav-pills .nav-link {
+    color: #333;
+}
+
+.tab-pane {
+    padding: 20px 0;
+}

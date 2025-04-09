@@ -5,9 +5,9 @@ marketApp = Flask(__name__)
 
 
 DATABASE = {
-    'dbname': 'supermercado',
+    'dbname': 'Supermarket',
     'user': 'postgres',
-    'password': 'Lun@25',
+    'password': '1928',
     'host': 'localhost',  
     'port': '5432'  
 }
