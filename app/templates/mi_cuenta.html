@@ -77,6 +77,11 @@
                                                 {% endfor %}
                                             </ul>
                                         </details>
+                                        {% if pedido.estado not in ['Entregado', 'Cancelado','Enviado'] %}
+                                            <form action="{{ url_for('cancelar_pedido', id_pedido=pedido.id_pedido) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger">Cancelar Pedido</button>
+                                            </form>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -84,7 +89,7 @@
                             <div class="alert alert-info">
                                 No tienes pedidos recientes.
                             </div>
-                        {% endif %}                        
+                        {% endif %}                                             
                         </div>
                     </div>
                 </div>

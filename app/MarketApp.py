@@ -224,6 +224,47 @@ def registro():
             flash(f'Error al registrar: {result}', 'danger')
     
     return render_template('registro.html')
+#Cancelar Pedido
+@marketApp.route('/cancelar_pedido/<int:id_pedido>', methods=['POST'])
+@login_required
+def cancelar_pedido(id_pedido):
+    try:
+        with psycopg2.connect(**DATABASE) as conn:
+            with conn.cursor() as cursor:
+                # Verificamos si el pedido pertenece al usuario y no ha sido entregado
+                cursor.execute("""
+                    SELECT estado, id_usuario FROM pedidos WHERE id_pedido = %s
+                """, (id_pedido,))
+                pedido = cursor.fetchone()
+
+                if not pedido:
+                    flash('Pedido no encontrado', 'danger')
+                    return redirect(url_for('mi_cuenta'))
+                
+                estado, id_usuario = pedido
+                # Solo puede cancelar el pedido si no está entregado
+                if estado == 'Entregado':
+                    flash('Este pedido ya ha sido entregado y no puede ser cancelado.', 'danger')
+                    return redirect(url_for('mi_cuenta'))
+                
+                if id_usuario != session.get('usuario_id'):
+                    flash('No tienes permiso para cancelar este pedido.', 'danger')
+                    return redirect(url_for('mi_cuenta'))
+                
+                # Actualizamos el estado del pedido a 'Cancelado'
+                cursor.execute("""
+                    UPDATE pedidos
+                    SET estado = 'Cancelado'
+                    WHERE id_pedido = %s
+                """, (id_pedido,))
+                conn.commit()
+
+                flash('Pedido cancelado exitosamente.', 'success')
+                return redirect(url_for('mi_cuenta'))
+    except Exception as e:
+        print(f"Error al cancelar pedido: {e}")
+        flash('Hubo un error al intentar cancelar el pedido.', 'danger')
+        return redirect(url_for('mi_cuenta'))
 
 @marketApp.route('/mi-cuenta')
 @login_required
