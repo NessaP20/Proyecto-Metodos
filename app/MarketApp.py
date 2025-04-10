@@ -9,9 +9,9 @@ marketApp.secret_key = os.urandom(24)  # Necesario para sesiones y mensajes flas
 
 DATABASE = {
     
-    'dbname': 'Supermercado-2',
+    'dbname': 'Supermercado',
     'user': 'postgres',
-    'password': 'Lun@25',
+    'password': '1928',
     'host': 'localhost',  
     'port': '5432' , 
 }
@@ -412,25 +412,43 @@ def agregar_carrito(producto_id):
     return redirect(url_for('index'))  
 
 @marketApp.route('/carrito')
+@login_required
 def carrito():
-    productos_en_carrito = session.get('carrito', [])
+    carrito = session.get('carrito', {})
+    productos_en_carrito = []
+
+    for id_str, cantidad in carrito.items():
+        producto = obtener_producto_por_id(int(id_str))
+        if producto:
+            producto['cantidad'] = cantidad
+            productos_en_carrito.append(producto)
+
     return render_template('carrito.html', productos=productos_en_carrito)
+
+
 def obtener_producto_por_id(id_producto):
-    productos=obtener_productos()
-    return next((producto for producto in productos if producto['id']==id_producto), None)
+    productos = obtener_productos()
+    return next((producto for producto in productos if producto['id_producto'] == id_producto), None)
+
 
 @marketApp.route('/agregar_al_carrito/<int:producto_id>')
+@login_required
 def agregar_al_carrito(producto_id):
-    
-    producto = obtener_producto_por_id(producto_id)  
+    if 'carrito' not in session:
+        session['carrito'] = {}
 
-    if producto:
-        if 'carrito' not in session:
-            session['carrito'] = []
+    carrito = session['carrito']
 
-        session['carrito'].append(producto)
+    # Usamos str(producto_id) porque session almacena claves como strings
+    producto_id_str = str(producto_id)
+    if producto_id_str in carrito:
+        carrito[producto_id_str] += 1
+    else:
+        carrito[producto_id_str] = 1
 
+    session['carrito'] = carrito
     return redirect(url_for('carrito'))
+
 
 
 if __name__ == '__main__':
