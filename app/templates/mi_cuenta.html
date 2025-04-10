@@ -58,9 +58,33 @@
                         <div class="tab-pane fade" id="v-pills-orders" role="tabpanel" aria-labelledby="v-pills-orders-tab">
                             <h4>Mis Pedidos</h4>
                             <p>Aquí podrás ver el historial de tus pedidos.</p>
+                            {% if pedidos %}
+                            <ul class="list-group">
+                                {% for pedido in pedidos %}
+                                    <li class="list-group-item">
+                                        <strong>Pedido #{{ pedido.id_pedido }}</strong><br>
+                                        <small>Fecha: {{ pedido.fecha_pedido.strftime('%Y-%m-%d %H:%M') }}</small><br>
+                                        <span>Estado: {{ pedido.estado }}</span><br>
+                                        <span>Total: ${{ pedido.total }}</span><br>
+                                        <details>
+                                            <summary>Ver productos</summary>
+                                            <ul>
+                                                {% for producto in pedido.productos %}
+                                                    <li>
+                                                        {{ producto.nombre }} - {{ producto.cantidad }} x ${{ producto.precio }}
+                                                        = ${{ (producto.precio * producto.cantidad) | round(2) }}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </details>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
                             <div class="alert alert-info">
                                 No tienes pedidos recientes.
                             </div>
+                        {% endif %}                        
                         </div>
                     </div>
                 </div>

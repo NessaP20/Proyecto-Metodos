@@ -106,6 +106,62 @@ def obtener_productos():
     except Exception as e:
         print(f"Error al obtener productos: {e}")
         return []
+    
+import json
+
+def obtener_pedidos_usuario(id_usuario):
+    try:
+        with psycopg2.connect(**DATABASE) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT id_pedido, fecha_pedido, estado, productos, total
+                    FROM pedidos
+                    WHERE id_usuario = %s
+                    ORDER BY fecha_pedido DESC
+                """, (id_usuario,))
+                pedidos_raw = cursor.fetchall()
+
+                pedidos = []
+                for p in pedidos_raw:
+                    productos_json = p[3]  # JSONB con id_producto y cantidad
+                    productos_list = []
+
+                    # Extrae lista de ids
+                    ids = [item['id_producto'] for item in productos_json]
+                    if ids:
+                        format_strings = ','.join(['%s'] * len(ids))
+                        cursor.execute(f"""
+                            SELECT id_producto, nombre, precio
+                            FROM productos
+                            WHERE id_producto IN ({format_strings})
+                        """, tuple(ids))
+                        productos_info = {prod[0]: {'nombre': prod[1], 'precio': float(prod[2])} for prod in cursor.fetchall()}
+
+                        for item in productos_json:
+                            id_prod = item['id_producto']
+                            cantidad = item['cantidad']
+                            info = productos_info.get(id_prod, {'nombre': 'Producto desconocido', 'precio': 0.0})
+                            productos_list.append({
+                                'id_producto': id_prod,
+                                'nombre': info['nombre'],
+                                'precio': info['precio'],
+                                'cantidad': cantidad
+                            })
+
+                    pedidos.append({
+                        'id_pedido': p[0],
+                        'fecha_pedido': p[1],
+                        'estado': p[2],
+                        'productos': productos_list,
+                        'total': float(p[4])
+                    })
+
+                return pedidos
+    except Exception as e:
+        print(f"Error al obtener pedidos del usuario: {e}")
+        return []
+
+
 #Rutas
 @marketApp.route('/')
 def index():
@@ -172,7 +228,8 @@ def registro():
 @marketApp.route('/mi-cuenta')
 @login_required
 def mi_cuenta():
-    return render_template('mi_cuenta.html')
+    pedidos = obtener_pedidos_usuario(session['usuario_id'])
+    return render_template('mi_cuenta.html', pedidos=pedidos)
 
 @marketApp.context_processor
 def inject_user():

@@ -3,6 +3,7 @@ from faker import Faker
 import psycopg2
 from datetime import datetime
 from psycopg2.extras import Json
+from werkzeug.security import generate_password_hash
 
 fake = Faker('en_US')
 
@@ -64,27 +65,36 @@ def insertar_datos(tabla, columnas, valores):
 
 # Crear usuarios
 usuarios_ids = []
-for i in range(1000):
-    nombre = fake.first_name()
-    apellido = fake.last_name()
-    correo = fake.unique.email()
-    telefono = fake.numerify(text='####-####')
-    contraseña = fake.password()
-    direccion = fake.address().replace("\n", ", ")
-    rol = "Cliente"
 
-    insertar_datos(
-        'usuarios',
-        ['nombre', 'apellido', 'correo', 'telefono', 'contraseña_hash', 'rol', 'direccion'],
-        [nombre, apellido, correo, telefono, contraseña, rol, direccion]
-    )
+# Abrir archivo antes del bucle
+with open("usuarios.txt", "w", encoding="utf-8") as archivo:
+    for i in range(1000):
+        nombre = fake.first_name()
+        apellido = fake.last_name()
+        correo = fake.unique.email()
+        telefono = fake.numerify(text='####-####')
+        contraseña_plana = fake.password()
+        contraseña = generate_password_hash(contraseña_plana)
+        direccion = fake.address().replace("\n", ", ")
+        rol = "Cliente"
 
-    # Obtener el id del usuario recién insertado
-    with conectar_bd() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT MAX(id_usuario) FROM usuarios")
-            user_id = cursor.fetchone()[0]
-            usuarios_ids.append(user_id)
+        insertar_datos(
+            'usuarios',
+            ['nombre', 'apellido', 'correo', 'telefono', 'contraseña_hash', 'rol', 'direccion'],
+            [nombre, apellido, correo, telefono, contraseña, rol, direccion]
+        )
+
+        # Guardar email y contraseña sin hash
+        archivo.write(f"Email: {correo}\n")
+        archivo.write(f"Contraseña: {contraseña_plana}\n")
+        archivo.write("-" * 30 + "\n")
+
+        # Obtener el id del usuario recién insertado
+        with conectar_bd() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT MAX(id_usuario) FROM usuarios")
+                user_id = cursor.fetchone()[0]
+                usuarios_ids.append(user_id)
 
 # Obtener los productos disponibles desde la base de datos
 productos_disponibles = obtener_productos_disponibles()
