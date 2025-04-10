@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Carrito de Compras</h2>
+        <div class="row">
+            {% if productos %}
+                {% for producto in productos %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="{{ producto['imagen_url'] }}" class="card-img-top" alt="{{ producto['nombre'] }}">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ producto['nombre'] }}</h5>
+                                <p class="card-text">{{ producto['descripcion'] }}</p>
+                                <p class="fw-bold">${{ producto['precio'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">Tu carrito está vacío.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

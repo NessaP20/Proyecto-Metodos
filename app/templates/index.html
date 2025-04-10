@@ -24,10 +24,9 @@
                     <li class="nav-item"><a class="nav-link" href="#">CATEGORIAS</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{url_for('agregar_producto')}}">AGREGAR PRODUCTO</a></li>
                 </ul>
-                
-                <a class="nav-link cart" href="#">
+                <a class="nav-link cart" href="{{ url_for('carrito') }}">
                     <i class="fas fa-shopping-cart"></i> CARRITO <span class="badge bg-danger">3</span>
-                </a>
+                </a>               
                 
                 {% if usuario_id %}
                     <!-- Usuario logueado -->
@@ -73,7 +72,7 @@
                                 <h5 class="card-title">{{ producto['nombre'] }}</h5>
                                 <p class="card-text">{{ producto['descripcion'] }}</p>
                                 <p class="fw-bold">${{ producto['precio'] }}</p>
-                                <button class="btn-green">Añadir al carrito</button>
+                                <a href="{{ url_for('agregar_al_carrito', producto_id=producto['id']) }}" class="btn-green">Añadir al carrito</a>
                             </div>
                         </div>
                     </div>

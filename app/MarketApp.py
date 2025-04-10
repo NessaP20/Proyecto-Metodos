@@ -9,13 +9,14 @@ marketApp.secret_key = os.urandom(24)  # Necesario para sesiones y mensajes flas
 
 DATABASE = {
     
-    'dbname': 'Supermercado',
+    'dbname': 'Supermercado-2',
     'user': 'postgres',
-    'password': '1928',
+    'password': 'Lun@25',
     'host': 'localhost',  
     'port': '5432' , 
 }
 
+        
 # Funcion para verificar usuario
 def verificar_usuario(correo, contraseña):
     try:
@@ -399,6 +400,38 @@ def agregar_producto():
             flash(f'Error inesperado: {str(e)}', 'danger')
     
     return render_template('agregar_producto.html', categorias=categorias.keys())
+
+
+@marketApp.route('/agregar_carrito/<int:producto_id>')
+def agregar_carrito(producto_id):
+    producto = obtener_producto_por_id(producto_id)  
+    if 'carrito' not in session:
+        session['carrito'] = []
+    session['carrito'].append(producto) 
+    session.modified = True 
+    return redirect(url_for('index'))  
+
+@marketApp.route('/carrito')
+def carrito():
+    productos_en_carrito = session.get('carrito', [])
+    return render_template('carrito.html', productos=productos_en_carrito)
+def obtener_producto_por_id(id_producto):
+    productos=obtener_productos()
+    return next((producto for producto in productos if producto['id']==id_producto), None)
+
+@marketApp.route('/agregar_al_carrito/<int:producto_id>')
+def agregar_al_carrito(producto_id):
+    
+    producto = obtener_producto_por_id(producto_id)  
+
+    if producto:
+        if 'carrito' not in session:
+            session['carrito'] = []
+
+        session['carrito'].append(producto)
+
+    return redirect(url_for('carrito'))
+
 
 if __name__ == '__main__':
     marketApp.run(debug=True)
