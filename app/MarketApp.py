@@ -39,30 +39,27 @@ def verificar_usuario(correo, contraseña):
         return None
 
 # Funciona para crear un nuevo usuario
-def registrar_usuario(nombre, apellido, correo, telefono, contraseña, direccion):
+def registrar_usuario(nombre, apellido, correo, telefono, contraseña, direccion, rol='Cliente'):
     try:
-        # oculta la contraseña
         contraseña_hash = generate_password_hash(contraseña)
-        
+
         with psycopg2.connect(**DATABASE) as conn:
             with conn.cursor() as cursor:
-                # Comprueba si el correo existe
                 cursor.execute("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,))
                 if cursor.fetchone():
                     return False, "El correo electrónico ya está registrado"
-                
-                # crea nuevo usuario
+
                 cursor.execute(
                     """
                     INSERT INTO usuarios (nombre, apellido, correo, telefono, contraseña_hash, rol, direccion)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id_usuario
                     """,
-                    (nombre, apellido, correo, telefono, contraseña_hash, 'Cliente', direccion)
+                    (nombre, apellido, correo, telefono, contraseña_hash, rol, direccion)
                 )
                 id_usuario = cursor.fetchone()[0]
                 conn.commit()
-                
+
                 return True, id_usuario
     except Exception as e:
         print(f"Error al registrar usuario: {e}")
@@ -76,6 +73,23 @@ def login_required(f):
             flash('Por favor inicie sesión para acceder a esta página', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
+    return decorated_function
+
+def login_required_admin(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Verifica que el usuario esté logueado
+        if 'usuario_id' not in session:
+            flash('Por favor inicie sesión para acceder a esta página', 'warning')
+            return redirect(url_for('login'))
+        
+        # Verifica que el usuario tenga el rol de 'Administrador'
+        if session.get('usuario_rol') != 'Administrador':
+            flash('Acceso denegado. Solo los administradores pueden acceder a esta página.', 'danger')
+            return redirect(url_for('index'))  # Redirige a la página de inicio o donde sea adecuado
+
+        return f(*args, **kwargs)
+    
     return decorated_function
 
 # Prueba de conexion de base de datos
@@ -205,25 +219,30 @@ def registro():
         contraseña = request.form.get('contraseña')
         confirmar_contraseña = request.form.get('confirmar_contraseña')
         direccion = request.form.get('direccion')
-        
-        # valida form datos
+        crear_admin = request.form.get('crear_admin')  # <- NUEVO
+
+        # validaciones
         if not all([nombre, apellido, correo, contraseña, confirmar_contraseña, direccion]):
             flash('Por favor complete todos los campos obligatorios', 'danger')
             return render_template('registro.html')
-        
+
         if contraseña != confirmar_contraseña:
             flash('Las contraseñas no coinciden', 'danger')
             return render_template('registro.html')
-        
-        # regitra el usuario
-        success, result = registrar_usuario(nombre, apellido, correo, telefono, contraseña, direccion)
-        
+
+        # Si se seleccionó "crear como admin", se cambia el rol
+        rol = 'Administrador' if crear_admin else 'Cliente'
+
+        success, result = registrar_usuario(
+            nombre, apellido, correo, telefono, contraseña, direccion, rol
+        )
+
         if success:
             flash('Registro exitoso. Ahora puede iniciar sesión.', 'success')
             return redirect(url_for('login'))
         else:
             flash(f'Error al registrar: {result}', 'danger')
-    
+
     return render_template('registro.html')
 #Cancelar Pedido
 @marketApp.route('/cancelar_pedido/<int:id_pedido>', methods=['POST'])
@@ -316,6 +335,7 @@ def agregar_producto_db(nombre, descripcion, precio, id_categoria, imagen_url=No
         return False, f"Error al insertar producto: {e}"
 
 @marketApp.route('/agregar_producto', methods=['GET', 'POST'])
+@login_required_admin
 def agregar_producto():
     categorias = obtener_categorias()
     

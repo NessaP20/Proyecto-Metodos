@@ -18,16 +18,28 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">INICIAR SESION</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{{ url_for('registro') }}">REGISTRO</a>
-                        </li>
-                    </ul>
-                </div>
+                {% if usuario_id %}
+                    <!-- Usuario logueado -->
+                    <div class="user-menu">
+                        <span class="welcome-text">Hola, {{ usuario_nombre }}</span>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('mi_cuenta') }}"><i class="fas fa-user"></i> Mi Cuenta</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Usuario no logueado -->
+                    <div class="d-flex">
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">Iniciar Sesión</a>
+                        <a href="{{ url_for('registro') }}" class="btn btn-light">Registrarse</a>
+                    </div>
+                {% endif %}
             </div>
         </nav>
     

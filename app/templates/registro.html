@@ -83,7 +83,9 @@
                     <label for="direccion" class="form-label">Dirección *</label>
                     <textarea class="form-control" id="direccion" name="direccion" rows="3" required></textarea>
                 </div>
-                
+                <label>
+                    <input type="checkbox" name="crear_admin"> Registrar como Administrador
+                </label>
                 <button type="submit" class="btn-green">Registrarse</button>
                 <div class="text-center mt-3">
                     <p>¿Ya tienes una cuenta? <a href="{{ url_for('login') }}" style="color: #28a745;">Iniciar Sesión</a></p>
