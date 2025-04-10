@@ -16,6 +16,7 @@ DATABASE = {
     'port': '5432' , 
 }
 
+        
 # Funcion para verificar usuario
 def verificar_usuario(correo, contraseña):
     try:
@@ -399,6 +400,56 @@ def agregar_producto():
             flash(f'Error inesperado: {str(e)}', 'danger')
     
     return render_template('agregar_producto.html', categorias=categorias.keys())
+
+
+@marketApp.route('/agregar_carrito/<int:producto_id>')
+def agregar_carrito(producto_id):
+    producto = obtener_producto_por_id(producto_id)  
+    if 'carrito' not in session:
+        session['carrito'] = []
+    session['carrito'].append(producto) 
+    session.modified = True 
+    return redirect(url_for('index'))  
+
+@marketApp.route('/carrito')
+@login_required
+def carrito():
+    carrito = session.get('carrito', {})
+    productos_en_carrito = []
+
+    for id_str, cantidad in carrito.items():
+        producto = obtener_producto_por_id(int(id_str))
+        if producto:
+            producto['cantidad'] = cantidad
+            productos_en_carrito.append(producto)
+
+    return render_template('carrito.html', productos=productos_en_carrito)
+
+
+def obtener_producto_por_id(id_producto):
+    productos = obtener_productos()
+    return next((producto for producto in productos if producto['id_producto'] == id_producto), None)
+
+
+@marketApp.route('/agregar_al_carrito/<int:producto_id>')
+@login_required
+def agregar_al_carrito(producto_id):
+    if 'carrito' not in session:
+        session['carrito'] = {}
+
+    carrito = session['carrito']
+
+    # Usamos str(producto_id) porque session almacena claves como strings
+    producto_id_str = str(producto_id)
+    if producto_id_str in carrito:
+        carrito[producto_id_str] += 1
+    else:
+        carrito[producto_id_str] = 1
+
+    session['carrito'] = carrito
+    return redirect(url_for('carrito'))
+
+
 
 if __name__ == '__main__':
     marketApp.run(debug=True)
